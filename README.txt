@@ -32,9 +32,9 @@ Notes:
 - NPC animation template
 - Level transition
 - Level transition location selection
-- Item persistence on level transition (Broken)
-- Saving player item state (Broken)
-- Loading player item state (Broken)
+- Item persistence on level transition
+- Saving player item state
+- Loading player item state
 - Stage 1
 	- Player starts here
 - Stage 2
@@ -57,8 +57,6 @@ Notes:
 // ==================================================
 // Todo
 // ==================================================
-- The player state saving function has problems after 
-  packaging, fix this.
 
 
 
