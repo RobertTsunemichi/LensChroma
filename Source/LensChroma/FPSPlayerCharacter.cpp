@@ -111,28 +111,6 @@ void AFPSPlayerCharacter::BeginPlay()
 	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT(">>> FPSChar BeginPlay <<<")));
 	//// Check if went through portal
 	//bool bLoadFromMenu = true;
-
-	// Check player state for portal
-	USaveGamePlayer* LoadPlayerInstance = Cast<USaveGamePlayer>(UGameplayStatics::CreateSaveGameObject(USaveGamePlayer::StaticClass()));
-	LoadPlayerInstance = Cast<USaveGamePlayer>(UGameplayStatics::LoadGameFromSlot(LoadPlayerInstance->PlayerName + FString("State"), LoadPlayerInstance->UserSlot));
-	if (LoadPlayerInstance)
-	{
-		if (LoadPlayerInstance->bIsCurrentlyInGame)
-		{
-			//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("bIsCurrentlyInGame: true")));
-
-			// Remove the bIsCurrentlyInGame flag
-			SavePlayer(false);
-
-			//// Don't load save from menu
-			//bLoadFromMenu = false;
-		}
-		/*else
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("bIsCurrentlyInGame: false")));
-			bLoadFromMenu = true;
-		}*/
-	}
 	
 	//// Only load from menu if you are not going through a portal
 	//if (bLoadFromMenu)
@@ -1095,26 +1073,35 @@ void AFPSPlayerCharacter::SavePlayer(bool FromInGame)
 
 	if (SavePlayerInstance)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Created the save player instance. Adding player state to instance."));
 		// Variables to always save
 		SaveCore(SavePlayerInstance);
 
 		// Went through portal bool
 		SavePlayerInstance->bIsCurrentlyInGame = FromInGame;
 
+		UE_LOG(LogTemp, Warning, TEXT("Created the save player instance. Saving the player instance."));
 		// Save
 		UGameplayStatics::SaveGameToSlot(SavePlayerInstance, SavePlayerInstance->PlayerName + FString("State"), SavePlayerInstance->UserSlot);
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to create the save player instance."));
+	}
 }
-
+ 
 bool AFPSPlayerCharacter::LoadPlayer()
 {
 	USaveGamePlayer* LoadPlayerInstance = Cast<USaveGamePlayer>(UGameplayStatics::CreateSaveGameObject(USaveGamePlayer::StaticClass()));
+
 	LoadPlayerInstance = Cast<USaveGamePlayer>(UGameplayStatics::LoadGameFromSlot(LoadPlayerInstance->PlayerName + FString("State"), LoadPlayerInstance->UserSlot));
 
 	if (LoadPlayerInstance)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Created the player load instance."));
 		if (LoadPlayerInstance->bIsCurrentlyInGame)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Loading from within the game."));
 			// Load player state
 			bIsHoldingCamera = LoadPlayerInstance->bIsHoldingCamera;
 			bIsCameraToggled = LoadPlayerInstance->bIsCameraToggled;
@@ -1162,11 +1149,20 @@ bool AFPSPlayerCharacter::LoadPlayer()
 				ToggleFlashlight();
 			}
 
-			//// Remove the bIsCurrentlyInGame flag
-			//SavePlayer(false);
+			UE_LOG(LogTemp, Warning, TEXT("Overriding the player state without the in-game state."));
+			// Remove the bIsCurrentlyInGame flag
+			SavePlayer(false);
 
 			return true;
 		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("BAD_LOAD. Was loaded from outside game state. This should only occur when the game is first started or restarted."));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to create the load player instance."));
 	}
 	return false;
 }
