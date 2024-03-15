@@ -63,6 +63,8 @@ AActor* ABaseGameMode::ChoosePlayerStart_Implementation(AController* Player)
 
 void ABaseGameMode::InitPlayerSavedData()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Initializing the player save data"));
+
 	if (UGameplayStatics::DoesSaveGameExist("PlayerData", 0))
 	{
 		UGameplayStatics::LoadGameFromSlot("PlayerData", 0);

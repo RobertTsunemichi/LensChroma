@@ -237,6 +237,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool LoadPlayer();
 
+	UFUNCTION(BlueprintCallable)
 	void SaveCore(USaveGamePlayer* InCore);
 
 	/*UFUNCTION(BlueprintCallable)
