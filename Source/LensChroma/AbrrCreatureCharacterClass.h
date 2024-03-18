@@ -2,64 +2,58 @@
 
 #pragma once
 
+// Headers
 #include "CoreMinimal.h"
+
 #include "GameFramework/Character.h"
+
+// Required generated header
 #include "AbrrCreatureCharacterClass.generated.h"
 
+/*
+ * The base aberration creature class  
+ */
 UCLASS()
 class LENSCHROMA_API AAbrrCreatureCharacterClass : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
+	// Constructor
 	AAbrrCreatureCharacterClass();
 
-	float TestTimer = 0.f;
+	// Timing variables
+	float ActionTimer = 0.f;
 	float AttackTimer = 0.f;
+	float CheckAgroTimer = 0.5f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsNeutral = true;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bHasDied = false;
-
+	// Creature state
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsDead = false;
+	bool bHasFallen = false;
+	float FallRes = 0.f;
 
+	// Creature combat variables
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DrainPower = 5.f; 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DrainRange = 225.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bHasPlayerTarget = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bHasBCharTarget = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AActor* PlayerTargetActor;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AActor* BCharTargetActor;
 
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class USphereComponent* FleeRangeCollider;*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USphereComponent* AgroRangeCollider;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsInAttackRange = false;
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class USphereComponent* AttackRangeCollider;*/
 
+	// Creature stats
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MaxHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CurrentHealth;
-
-	bool bHasFallen = false;
-	float FallRes = 0.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector PlayerTargetLocation;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector BCharTargetLocation;
 
 protected:
 	// Called when the game starts or when spawned
@@ -69,14 +63,12 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	void CalculateFallDamage();
+	void CheckIfDead();
+	void CheckTargetAndMove();
 	void RandomMove();
-	void FleeFromCharacter();
 	void AgroCharacter(FVector NHeading);
-	void AttackCharacter();
-	void MoveToTarget(AActor* TargetActor);
+	void MoveToTarget(AActor* TargetActor, int32 InInt);
 
 	UFUNCTION()
 	virtual void OnOverlapBegin(
