@@ -9,9 +9,6 @@
 // Sets default values
 AFollowTargetPoints::AFollowTargetPoints()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
 	ColliderSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ColliderSphere"));
 	SetRootComponent(ColliderSphere);
 
@@ -28,21 +25,6 @@ void AFollowTargetPoints::BeginPlay()
 	ColliderSphere->OnComponentBeginOverlap.AddDynamic(this, &AFollowTargetPoints::OnOverlapBegin);
 	
 }
-
-//// Called every frame
-//void AFollowTargetPoints::Tick(float DeltaTime)
-//{
-//	Super::Tick(DeltaTime);
-//
-//	/*TimeCounter += DeltaTime;
-//
-//	if (TimeCounter >= 1.0f)
-//	{
-//		Points -= 1;
-//		TimeCounter = 0.f;
-//	}*/
-//
-//}
 
 // Overlap for fleeing
 void AFollowTargetPoints::OnOverlapBegin(

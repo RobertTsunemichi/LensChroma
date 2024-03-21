@@ -13,8 +13,8 @@ class UInteractableInterface : public UInterface
 	GENERATED_BODY()
 };
 
-/**
- * 
+/*
+ * The interface to use
  */
 class LENSCHROMA_API IInteractableInterface
 {
