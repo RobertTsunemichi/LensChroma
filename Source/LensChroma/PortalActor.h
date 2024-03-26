@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
 #include "InteractableInterface.h"
 #include "BaseStructureClass.h"
 #include "PortalActor.generated.h"
@@ -17,12 +16,13 @@ public:
 	// Sets default values for this actor's properties
 	APortalActor();
 
+	// Collider
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USphereComponent* ColliderSphere;
 
+	// Level transition variables
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName TeleTag;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName LevelName;
 
@@ -31,8 +31,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+	// Interaction action function
 	virtual void ActivateInteraction_Implementation(AActor* InActor, int InInt) override;
 };

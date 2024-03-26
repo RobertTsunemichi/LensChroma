@@ -9,10 +9,7 @@
 
 // Sets default values
 AGameFinishedActor::AGameFinishedActor()
-{
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-	
+{	
 	ColliderSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ColliderSphere"));
 	ColliderSphere->SetupAttachment(RootComponent);
 
@@ -29,14 +26,6 @@ void AGameFinishedActor::BeginPlay()
 	ColliderSphere->OnComponentBeginOverlap.AddDynamic(this, &AGameFinishedActor::OnOverlapBegin);
 }
 
-// Called every frame
-void AGameFinishedActor::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-
 // Overlap for fleeing
 void AGameFinishedActor::OnOverlapBegin(
 	UPrimitiveComponent* OverlappedComponent,
@@ -50,7 +39,6 @@ void AGameFinishedActor::OnOverlapBegin(
 	AFPSPlayerCharacter* FPSChar = Cast<AFPSPlayerCharacter>(OtherActor);
 	if (FPSChar)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Red, FString::Printf(TEXT("Has Finished!!!")));
 		// 
 		if (!FPSChar->bHasFinished)
 		{
@@ -59,7 +47,6 @@ void AGameFinishedActor::OnOverlapBegin(
 			FPSChar->bHasFinished = true;
 		}
 
-		//GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Red, FString::Printf(TEXT("Removing hostiles")));
 		// Remove hostiles
 		TArray<AActor*> ActorsToRemove;
 		// Toggle platform objects
