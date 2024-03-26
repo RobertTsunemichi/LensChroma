@@ -33,12 +33,6 @@ public:
 	bool bIsLookingThroughCamera;
 
 	UPROPERTY(VisibleAnywhere, Category = "Basic")
-	int SelectedItem;
-
-	UPROPERTY(VisibleAnywhere, Category = "Basic")
-	int Items[6];
-
-	UPROPERTY(VisibleAnywhere, Category = "Basic")
 	bool bIsCurrentlyInGame;
 	UPROPERTY(VisibleAnywhere, Category = "Basic")
 	bool bIsFromMenu;
@@ -47,7 +41,7 @@ public:
 	float PlayerSanity;
 
 	UPROPERTY(VisibleAnywhere, Category = "Basic")
-	float PlayerMaxSanity;
+	float CameraBattery;
 
 	UPROPERTY(VisibleAnywhere, Category = "Basic")
 	bool bHasFlashlightOn;
@@ -81,7 +75,6 @@ public:
 	bool bPullFilterActive;
 	UPROPERTY(VisibleAnywhere, Category = "Basic")
 	bool bEraseFilterActive;
-
 
 	// Additional variables to save when saving/loading from menu
 	UPROPERTY(VisibleAnywhere, Category = "Basic")

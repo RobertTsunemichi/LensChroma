@@ -2,10 +2,14 @@
 
 #pragma once
 
+// Required header
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+
+// Save game header
 #include "SaveGamePlayer.h"
 
+// Required generated header
 #include "FPSPlayerCharacter.generated.h"
 
 UCLASS()
@@ -17,32 +21,26 @@ public:
 	// Sets default values for this character's properties
 	AFPSPlayerCharacter();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	class ABaseGameMode* GameModeRef;
-
+	// Game menu ui
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controller")
 	class APlayerControllerClass* PlayerControllerClass;
 
+	// Player camera 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UCameraComponent* FirstPersonCamera;
 
+	// Flashlight
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USpotLightComponent* Flashlight;
 
-	// Game Level Names to load into
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName CityLevelName;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName DimensionLevelName;
-
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName CurrentActiveLevel;*/
-
+	/*
+	 * TODO: Find a better way to implement this
+	 */
 	// Blueprint classes to check for
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<AActor> CameraLensActor;
+	// The platform used in showing/hiding
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AActor> PlatformObject;
+	// Added this platform as part of the tutorials
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AActor> PlatformObject2;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -55,59 +53,48 @@ public:
 	TSubclassOf<AActor> AbrrCreatureObject;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AActor> BoostUpwardPlatform;
+	// The alternate platform type that only shows when not viewed through the camera
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AActor> NonCameraViewObject;
+	// Objects to get points
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AActor> FollowPointsObject;
+	// Object to end the game
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AActor> GameFinishedObject;
 
+	// Creature materials, used for showing transparent creature or not when spawned
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UMaterialInterface* AbbrCreatureMat1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UMaterialInterface* AbbrCreatureMat2;
 
-	// Pickup items for healing etc.
+	// Pickup for healing and charging the camera
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AActor> SanityPillObject;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AActor> BatteryObject;
 
-	// 
+	// Mesh component for showing the held camera
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* StaticMeshComponentItem;
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UStaticMeshComponent* StaticMeshComponentItemCamDefault;*/
 
-	// 
+	// Material for the camera in hand
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UMaterialInterface* Material;
-	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	class UMaterialInterface* MaterialCamDefault;*/
-	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	class UMaterialInterface* CameraMaterial;*/
 
+	// Toggles for held camera states
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bIsHoldingCamera = false;
 	bool bIsCameraToggled = true;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bIsLookingThroughCamera = false;
 
-	float DefaultMaxMoveSpeed;
-	float Speed = 2.f;
-
+	// Check the LMBpushed state
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bLMBPushed = false;
 
-	const int MAX_ITEMS = 6;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	int SelectedItem = 0;
-	int Items[6] = { 0, 0, 0, 0, 0, 0 };
-
 	float CameraPushForce;
-
-	float DefaultColliderRadius;
-	float DefaultColliderHalfHeight;
 
 	// Player Sanity
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayerStats")
@@ -115,6 +102,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayerStats")
 	float PlayerMaxSanity;
 
+	// Player movement variables
+	float DefaultMaxMoveSpeed;
+	// Crouched state
+	float DefaultColliderRadius;
+	float DefaultColliderHalfHeight;
 	// Player Stamina
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float PlayerStamina;
@@ -132,10 +124,6 @@ public:
 	float CameraBattery = 100.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float CameraMaxBattery = 1000.f;
-
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayerStats")
-	float DamageTimeout = 1.f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PlayerStats")
 	bool bIsDead = false;
@@ -181,15 +169,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bFinalStage = false;
 
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	void MoveForwardBackward(float Value);
 	void MoveLeftRight(float Value);
-
-	void CycleCamera(float Value);
 
 	void MouseLMB();
 	void MouseRMB();
@@ -205,7 +190,6 @@ protected:
 	void ItemInteract();
 	void PauseGame();
 	void ToggleCamera();
-	void CycleCamera();
 	void ToggleFlashlight();
 
 	void InteractWithPortal(AActor* InActor);
@@ -229,7 +213,6 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void PickUpCamera(AActor* InActor);
-	//void ReCaptureCamera();
 
 	UFUNCTION(BlueprintCallable)
 	void SavePlayer(bool FromInGame);
@@ -239,13 +222,4 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SaveCore(USaveGamePlayer* InCore);
-
-	/*UFUNCTION(BlueprintCallable)
-	void ResetGame();*/
-
-	/*UFUNCTION(BlueprintCallable)
-	void SaveGameFromMenu();
-
-	UFUNCTION(BlueprintCallable)
-	void LoadGameFromMenu();*/
 };
