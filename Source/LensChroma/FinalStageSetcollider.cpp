@@ -8,9 +8,6 @@
 // Sets default values
 AFinalStageSetcollider::AFinalStageSetcollider()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
 	ColliderSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ColliderSphere"));
 	ColliderSphere->SetupAttachment(RootComponent);
 
@@ -25,13 +22,6 @@ void AFinalStageSetcollider::BeginPlay()
 	
 }
 
-// Called every frame
-void AFinalStageSetcollider::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
 // Overlap for fleeing
 void AFinalStageSetcollider::OnOverlapBegin(
 	UPrimitiveComponent* OverlappedComponent,
@@ -41,8 +31,6 @@ void AFinalStageSetcollider::OnOverlapBegin(
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT(">>> Set final stage")));
-	// FPSCharacter
 	AFPSPlayerCharacter* FPSChar = Cast<AFPSPlayerCharacter>(OtherActor);
 	if (FPSChar)
 	{

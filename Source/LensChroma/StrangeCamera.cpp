@@ -7,11 +7,7 @@
 // Sets default values
 AStrangeCamera::AStrangeCamera()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
 	ColliderSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ColliderSphere"));
-	//ColliderSphere->SetupAttachment(RootComponent);
 	SetRootComponent(ColliderSphere);
 
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
@@ -20,26 +16,10 @@ AStrangeCamera::AStrangeCamera()
 
 	Material = CreateDefaultSubobject<UMaterialInterface>(TEXT("Material"));
 	ConstructorHelpers::FObjectFinder<UMaterialInterface>MaterialAsset(TEXT("Material'/Game/Materials/Camera_M.Camera_M'"));
-	//StaticMeshComponent->SetMaterial(0, MaterialAsset.Object);
 	Material = MaterialAsset.Object;
 
 }
 
-// Called when the game starts or when spawned
-void AStrangeCamera::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void AStrangeCamera::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-//UStaticMeshComponent* AStrangeCamera::CameraInteract_Implementation(AActor* InTarget)
 UStaticMeshComponent* AStrangeCamera::CameraGetMesh_Implementation()
 {
 	return this->StaticMeshComponent;

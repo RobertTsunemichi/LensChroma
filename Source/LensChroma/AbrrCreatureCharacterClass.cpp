@@ -1,136 +1,141 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+// Required header
 #include "AbrrCreatureCharacterClass.h"
+
+// AI controller header
 #include "BaseAIControllerClass.h"
 
+// Collider sphere header
 #include "Components/SphereComponent.h"
 
+// Targets for creature headers
 #include "FPSPlayerCharacter.h"
 #include "BaseCharacterClass.h"
 
-// Sets default values
+/*
+ * Constructor
+ */
 AAbrrCreatureCharacterClass::AAbrrCreatureCharacterClass()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	/*FleeRangeCollider = CreateDefaultSubobject<USphereComponent>("FleeRangeCollider");
-	FleeRangeCollider->SetupAttachment(RootComponent);*/
-
+	// Set the agro collider
 	AgroRangeCollider = CreateDefaultSubobject<USphereComponent>("AgroRangeCollider");
 	AgroRangeCollider->SetupAttachment(RootComponent);
 
-	/*AttackRangeCollider = CreateDefaultSubobject<USphereComponent>("AttackRangeCollider");
-	AttackRangeCollider->SetupAttachment(RootComponent);*/
-
+	// Set the creature default stats
 	MaxHealth = 100.f;
 	CurrentHealth = 100.f;
-
 }
 
-// Called when the game starts or when spawned
+/*
+ * Things to set once the map has loaded
+ */
 void AAbrrCreatureCharacterClass::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Attach the begin/end overlap dynamic events to the collider
 	AgroRangeCollider->OnComponentBeginOverlap.AddDynamic(this, &AAbrrCreatureCharacterClass::OnOverlapBegin);
 	AgroRangeCollider->OnComponentEndOverlap.AddDynamic(this, &AAbrrCreatureCharacterClass::OnOverlapEnd);
-
 }
 
-// Called every frame
+/*
+ * Things to process every frame
+ */
 void AAbrrCreatureCharacterClass::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 	// Is dead, nothing to process
-	if (bIsDead) return;
+	if (!bIsDead)
+	{
+		// If the creature is faling
+		CalculateFallDamage();
 
+		// Is the creature dead?
+		CheckIfDead();
+
+		// Movement section
+		CheckTargetAndMove();
+
+		// Add time difference to timers
+		ActionTimer += DeltaTime;
+		AttackTimer += DeltaTime;
+	}
+}
+
+void AAbrrCreatureCharacterClass::CalculateFallDamage()
+{
+	// If the creature is faling
 	if (GetVelocity().Z < 0)
 	{
-		// Fall damage
-		//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("Creature vz:%f"), GetVelocity().Z));
+		// Calculate the fall damage
 		FallRes = GetVelocity().Z * (-1) - 1000;
+
+		// If the fall damage potential result exceeds 0
 		if (FallRes > 0)
 		{
+			// The creature has fallen enough to take damage
 			bHasFallen = true;
+			// Store the fall damage result to be applied next tick
 			FallRes = FallRes / 10.f;
 		}
 	}
 	else
 	{
+		// If the creature has falled enough to take damage
 		if (bHasFallen)
 		{
+			// Reset the flag for has fallen enough
 			bHasFallen = false;
+			// Reduce the creatures current remaining health
 			CurrentHealth -= FallRes;
+			// reset the fall damage result
 			FallRes = 0.f;
 		}
 	}
+}
 
+void AAbrrCreatureCharacterClass::CheckIfDead()
+{
 	if (CurrentHealth < 0)
 	{
-		// Used for animation
-		bHasDied = true;
-		bIsDead = true;
-		SetActorEnableCollision(false);
+		// Set the creature is dead flag
+		bIsDead = true; // Used for animation
+		SetActorEnableCollision(false); // Remove the collision of dead actors
 	}
+}
 
-	// Movement
-	if (bHasPlayerTarget)
-	{
-		//GEngine->AddOnScreenDebugMessage(400, 3.f, FColor::Red, FString::Printf(TEXT("Player target")));
-		MoveToTarget(PlayerTargetActor);
-	}
+void AAbrrCreatureCharacterClass::CheckTargetAndMove()
+{
+	// Move to player
+	if (PlayerTargetActor) MoveToTarget(PlayerTargetActor, 0);
+	// Move to npc
+	else if (BCharTargetActor) MoveToTarget(BCharTargetActor, 1);
+	// No target
 	else
 	{
-		if (bHasBCharTarget)
+		// Move to random location
+		if (ActionTimer >= 4.f)
 		{
-			//GEngine->AddOnScreenDebugMessage(404, 3.f, FColor::Red, FString::Printf(TEXT("BChar target")));
-			
-			// Move to character
-			MoveToTarget(BCharTargetActor);
-		}
-		else
-		{
-			//GEngine->AddOnScreenDebugMessage(405, 3.f, FColor::Red, FString::Printf(TEXT("No Target")));
-
-			// Move to random location
-			if (TestTimer >= 4.f)
-			{
-				//GEngine->AddOnScreenDebugMessage(406, 3.f, FColor::Red, FString::Printf(TEXT("Move random")));
-				RandomMove();
-				TestTimer = 0.f;
-			}
+			bIsInAttackRange = false;
+			RandomMove();
+			ActionTimer = 0.f;
 		}
 	}
-
-	TestTimer += DeltaTime;
-	AttackTimer += DeltaTime;
-
-	//// Random move
-	//TestTimer += DeltaTime;
-	//if (TestTimer >= 4.f)
-	//{
-	//	//GEngine->AddOnScreenDebugMessage(30, 3.f, FColor::Black, FString::Printf(TEXT("AbbrCreature: Moving!")));
-	//	RandomMove();
-	//	TestTimer = 0.f;
-	//}
 }
 
-// Called to bind functionality to input
-void AAbrrCreatureCharacterClass::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
-
+/*
+ * No targets are set so move about randomly
+ */
 void AAbrrCreatureCharacterClass::RandomMove()
 {
 	ABaseAIControllerClass* AICon = Cast<ABaseAIControllerClass>(GetController());
 	if (AICon)
 	{
-		//GEngine->AddOnScreenDebugMessage(31, 3.f, FColor::Black, FString::Printf(TEXT("AbbrCreature: Moving to random location!")));
 		FVector ActorLocation = GetActorLocation();
 		FVector NHeading = FVector(
 			ActorLocation.X + (int)FMath::FRandRange(500.f, 5000.f) - 2750.f,
@@ -138,69 +143,66 @@ void AAbrrCreatureCharacterClass::RandomMove()
 			ActorLocation.Z);
 		AICon->MoveToLocation(NHeading);
 	}
-	else
-	{
-		//GEngine->AddOnScreenDebugMessage(31, 3.f, FColor::Red, FString::Printf(TEXT("AbbrCreature: No AI Controller found!")));
-	}
 }
 
-void AAbrrCreatureCharacterClass::MoveToTarget(AActor* TargetActor)
+/*
+ * Move the aberration creature towards the target so it gets within attack range
+ */
+void AAbrrCreatureCharacterClass::MoveToTarget(AActor* TargetActor, int32 InInt)
 {
 	if (TargetActor)
 	{
-		if (TestTimer >= 0.5f)
+		// Check if should update the target agro
+		if (ActionTimer >= CheckAgroTimer)
 		{
+			// Update the target agro
 			if (TargetActor) AgroCharacter(TargetActor->GetActorLocation());
-			TestTimer = 0.f;
+			// Reset the timer
+			ActionTimer = 0.f;
 		}
 
-		// Distance difference to target
+		// Calculate the distance difference to the target
 		FVector DDist = TargetActor->GetActorLocation() - GetActorLocation();
 		float DistanceDiff = sqrtf(DDist.X * DDist.X
 			+ DDist.Y * DDist.Y
 			+ DDist.Z * DDist.Z);
 
 		// Check the distance difference
-		//GEngine->AddOnScreenDebugMessage(407, 3.f, FColor::Red, FString::Printf(TEXT("Distance: %f"), DistanceDiff));
-		if (DistanceDiff < DrainRange)
-		{
-			//GEngine->AddOnScreenDebugMessage(401, 3.f, FColor::Red, FString::Printf(TEXT("In attack range")));
-			bIsInAttackRange = true;
-		}
-		else
-		{
-			//GEngine->AddOnScreenDebugMessage(402, 3.f, FColor::Red, FString::Printf(TEXT("Not in attack range")));
-			bIsInAttackRange = false;
-		}
+		if (DistanceDiff < DrainRange) { bIsInAttackRange = true; }
+		else { bIsInAttackRange = false; }
 
-		if (bIsInAttackRange)
+		// If the distance to the target and the timer has timed out
+		if (bIsInAttackRange && AttackTimer >= 0.5f)
 		{
-			//GEngine->AddOnScreenDebugMessage(403, 3.f, FColor::Red, FString::Printf(TEXT("Can attack!")));
-			if (AttackTimer >= 0.5f)
+			// If a large number of targets will be used, use a switch statement
+			if (InInt == 0) // Player == 0
 			{
-				// FPSCharacter
+				// Damage the player
 				AFPSPlayerCharacter* FPSChar = Cast<AFPSPlayerCharacter>(TargetActor);
 				if (FPSChar)
 				{
-					//GEngine->AddOnScreenDebugMessage(511, 3.f, FColor::Red, FString::Printf(TEXT("Draining sanity!")));
 					FPSChar->PlayerSanity -= DrainPower;
 				}
-
-				// BaseCharacter
+			}
+			else // npc == 1
+			{
+				// Damage the other npc
 				ABaseCharacterClass* BChar = Cast<ABaseCharacterClass>(TargetActor);
 				if (BChar)
 				{
-					//GEngine->AddOnScreenDebugMessage(511, 3.f, FColor::Red, FString::Printf(TEXT("Draining sanity!")));
-					BChar->CurrentSanity -= 40.f;
+					BChar->CurrentSanity -= DrainPower * 8; // drain npcs quicker
 				}
-
-				AttackTimer = 0.f;
 			}
+
+			// Reset the attack timer
+			AttackTimer = 0.f;
 		}
 	}
 }
 
-// Overlap for fleeing
+/*
+ * Collider sphere overlap event
+ */
 void AAbrrCreatureCharacterClass::OnOverlapBegin(
 	UPrimitiveComponent* OverlappedComponent,
 	AActor* OtherActor,
@@ -210,48 +212,24 @@ void AAbrrCreatureCharacterClass::OnOverlapBegin(
 	const FHitResult& SweepResult)
 {
 	// Is dead don't process
-	if (bIsDead) return;
-
-	// Check distance to player
-	AFPSPlayerCharacter* FPSChar = Cast<AFPSPlayerCharacter>(OtherActor);
-	if (FPSChar)
+	if (!bIsDead)
 	{
-		/*FVector PlayerLocation = FPSChar->GetActorLocation();
-		FVector MyLocation = GetActorLocation();
-
-		FVector DistanceResult = PlayerLocation - MyLocation;
-		float Distance = sqrt(DistanceResult.X * DistanceResult.X + DistanceResult.Y * DistanceResult.Y + DistanceResult.Z * DistanceResult.Z);
-		Distance = abs(Distance);
-
-		GEngine->AddOnScreenDebugMessage(31, 3.f, FColor::Red, FString::Printf(TEXT("Distance to player: %f"), Distance));*/
-
-		//HeadingLocation = FPSChar->GetActorLocation();
-		PlayerTargetActor = OtherActor;
-		PlayerTargetLocation = FPSChar->GetActorLocation();
-		bHasPlayerTarget = true;
-	}
-	else
-	{
-		// Was not the player character
-		//GEngine->AddOnScreenDebugMessage(31, 3.f, FColor::Red, FString::Printf(TEXT("Not player")));
-
-		// Was the base character
-		ABaseCharacterClass* BaseChar = Cast<ABaseCharacterClass>(OtherActor);
-		if (BaseChar)
-		{
-			//HeadingLocation = BaseChar->GetActorLocation();
-			BCharTargetActor = OtherActor;
-			BCharTargetLocation = BaseChar->GetActorLocation();
-			bHasBCharTarget = true;
-		}
+		// Check if the agro collider overlapped with the player
+		AFPSPlayerCharacter* FPSChar = Cast<AFPSPlayerCharacter>(OtherActor);
+		if (FPSChar) PlayerTargetActor = OtherActor;
 		else
 		{
-			// Was neither the player or the base character
-			// Do nothing
+			// Check if the agro collider overlapped with an npc
+			ABaseCharacterClass* BaseChar = Cast<ABaseCharacterClass>(OtherActor);
+			if (BaseChar) BCharTargetActor = OtherActor;
+			// else do nothing
 		}
 	}
 }
 
+/*
+ * Collider sphere overlap end event
+ */
 void AAbrrCreatureCharacterClass::OnOverlapEnd(
 	UPrimitiveComponent* OverlappedComponent,
 	AActor* OtherActor,
@@ -259,55 +237,26 @@ void AAbrrCreatureCharacterClass::OnOverlapEnd(
 	int32 OtherBodyIndex)
 {
 	// Is dead don't process
-	if (bIsDead) return;
-
-	AFPSPlayerCharacter* FPSChar = Cast<AFPSPlayerCharacter>(OtherActor);
-	if (FPSChar)
+	if (!bIsDead)
 	{
-		bHasPlayerTarget = false;
-		PlayerTargetActor = nullptr;
-	}
-	else
-	{
-		ABaseCharacterClass* BaseChar = Cast<ABaseCharacterClass>(OtherActor);
-		if (BaseChar)
-		{
-			bHasBCharTarget = false;
-			BCharTargetActor = nullptr;
-		}
+		// Unset player from target
+		AFPSPlayerCharacter* FPSChar = Cast<AFPSPlayerCharacter>(OtherActor);
+		if (FPSChar) PlayerTargetActor = nullptr;
 		else
 		{
-			// Was neither the player or the base character
-			// Do nothing
+			// Unset npc from target
+			ABaseCharacterClass* BaseChar = Cast<ABaseCharacterClass>(OtherActor);
+			if (BaseChar) BCharTargetActor = nullptr;
+			// else do nothing
 		}
 	}
 }
 
-// Overlap for fleeing
-void AAbrrCreatureCharacterClass::FleeFromCharacter()
-{
-	// Is dead don't process
-	if (bIsDead) return;
-
-}
-
-// Overlap for agro
+/*
+ * Overlap event and timer occurred, move towards the targets location
+ */
 void AAbrrCreatureCharacterClass::AgroCharacter(FVector NHeading)
 {
-	// Is dead don't process
-	if (bIsDead) return;
-
 	ABaseAIControllerClass* AICon = Cast<ABaseAIControllerClass>(GetController());
-	if (AICon)
-	{
-		AICon->MoveToLocation(NHeading);
-	}
-}
-
-// Overlap for attack
-void AAbrrCreatureCharacterClass::AttackCharacter()
-{
-	// Is dead don't process
-	if (bIsDead) return;
-
+	if (AICon) AICon->MoveToLocation(NHeading);
 }

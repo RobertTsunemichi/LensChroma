@@ -5,7 +5,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-//#include "GameFramework/Actor.h"
 #include "BaseStructureClass.h"
 #include "NonCameraActor.generated.h"
 
@@ -17,13 +16,5 @@ class LENSCHROMA_API ANonCameraActor : public ABaseStructureClass
 public:	
 	// Sets default values for this actor's properties
 	ANonCameraActor();
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 };

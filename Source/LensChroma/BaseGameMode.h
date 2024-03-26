@@ -2,13 +2,19 @@
 
 #pragma once
 
+// Required
 #include "CoreMinimal.h"
+
+// Header
 #include "GameFramework/GameModeBase.h"
-#include "SaveGameLevel.h"
+
+// Save game header
 #include "SaveGamePlayer.h"
+
+// Required generated
 #include "BaseGameMode.generated.h"
 
-/**
+/*
  * 
  */
 UCLASS()
@@ -21,16 +27,16 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	// Blueprint handle for the player start location
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StartParameter")
 	TSubclassOf<AActor> PlayerStartBP;
 
 	// Blueprint for the player save game object
 	TSubclassOf<USaveGame> PlayerSaveData;
-
+	// Save game object
 	USaveGamePlayer* SavePlayerObject;
 
-	void InitPlayerSavedData();
-
+	// Override function for choosing the player start location
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 	
 };

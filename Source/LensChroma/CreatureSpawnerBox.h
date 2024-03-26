@@ -15,15 +15,11 @@ public:
 	// Sets default values for this actor's properties
 	ACreatureSpawnerBox();
 
+	// Use this to have something to grab the object easier in the world
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* StaticMesh;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USphereComponent* CreatureSpawnerSphere;
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 };

@@ -12,19 +12,7 @@ ACreatureSpawnerBox::ACreatureSpawnerBox()
 
 	CreatureSpawnerSphere = CreateDefaultSubobject<USphereComponent>(TEXT("CreatureSpawnerSphere"));
 	CreatureSpawnerSphere->SetupAttachment(RootComponent);
+
+	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
+	StaticMesh->SetupAttachment(CreatureSpawnerSphere);
 }
-
-// Called when the game starts or when spawned
-void ACreatureSpawnerBox::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void ACreatureSpawnerBox::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-

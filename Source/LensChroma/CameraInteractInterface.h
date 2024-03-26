@@ -14,7 +14,7 @@ class UCameraInteractInterface : public UInterface
 };
 
 /**
- * 
+ * The interface class that should be used
  */
 class LENSCHROMA_API ICameraInteractInterface
 {
@@ -28,5 +28,5 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	UMaterialInterface* CameraGetMaterial();
-	//UStaticMeshComponent* CameraInteract(AActor* InTarget);
+
 };

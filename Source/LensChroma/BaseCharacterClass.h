@@ -2,8 +2,13 @@
 
 #pragma once
 
+// Required header
 #include "CoreMinimal.h"
+
+// 
 #include "GameFramework/Character.h"
+
+// Required generated 
 #include "BaseCharacterClass.generated.h"
 
 UCLASS()
@@ -12,40 +17,45 @@ class LENSCHROMA_API ABaseCharacterClass : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
+	// Constructor
 	ABaseCharacterClass();
 
-	float TestTimer = 0.f;
+	// Timer variables
+	float ActionTimer = 0.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bHasDied = false;;
+	// Fall damage variables
+	bool bHasFallen = false;
+	float FallRes = 0.f;
+
+	// Character state variables
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bHasDied = false;*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsDead = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsFleeing = false;
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsFleeing = false;*/
 
+	// Character stat variables
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MaxSanity;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CurrentSanity;
 
-	bool bHasFallen = false;
-	float FallRes = 0.f;
-
-
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	//// Called when the game starts or when spawned
+	//virtual void BeginPlay() override;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	//// Called to bind functionality to input
+	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void CalculateFallDamage();
+	void CheckHealth();
 	void RandomMove();
 
-	UFUNCTION(BlueprintCallable)
-	void FleeMove(FVector InVector);
+	/*UFUNCTION(BlueprintCallable)
+	void FleeMove(FVector InVector);*/
 };

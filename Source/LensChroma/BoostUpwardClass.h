@@ -2,9 +2,13 @@
 
 #pragma once
 
+// Required header
 #include "CoreMinimal.h"
-//#include "GameFramework/Actor.h"
+
+// Inherit from base structure
 #include "BaseStructureClass.h"
+
+// Required generated
 #include "BoostUpwardClass.generated.h"
 
 UCLASS()
@@ -16,9 +20,11 @@ public:
 	// Sets default values for this actor's properties
 	ABoostUpwardClass();
 
+	// Collider for checking collision with the player
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USphereComponent* ColliderSphere;
 
+	// Amount to boost the player by
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Abilities")
 	float BoostStrength;
 
@@ -27,9 +33,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+	// Collider overlap event
 	UFUNCTION()
 	virtual void OnOverlapBegin(
 		UPrimitiveComponent* OverlappedComponent,

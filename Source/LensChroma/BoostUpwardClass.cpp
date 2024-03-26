@@ -1,28 +1,35 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+// Required
 #include "BoostUpwardClass.h"
+
+// Collider
 #include "Components/SphereComponent.h"
 
+// Check for this player
 #include "FPSPlayerCharacter.h"
 
-// Sets default values
+/*
+ * Constructor
+ */
 ABoostUpwardClass::ABoostUpwardClass()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+	// Collider
 	ColliderSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ColliderSphere"));
 	SetRootComponent(ColliderSphere);
 
+	// Static Mesh
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	StaticMeshComponent->SetupAttachment(GetRootComponent());
 
+	// Default boost strength
 	BoostStrength = 1500.f;
 
 }
 
-// Called when the game starts or when spawned
+/*
+ * Set the actor state on begin
+ */
 void ABoostUpwardClass::BeginPlay()
 {
 	Super::BeginPlay();
@@ -34,13 +41,9 @@ void ABoostUpwardClass::BeginPlay()
 	
 }
 
-// Called every frame
-void ABoostUpwardClass::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
+/*
+ * Boost the player on collider sphere overlap
+ */
 void ABoostUpwardClass::OnOverlapBegin(
 	UPrimitiveComponent* OverlappedComponent,
 	AActor* OtherActor,
@@ -52,17 +55,14 @@ void ABoostUpwardClass::OnOverlapBegin(
 	AFPSPlayerCharacter* FPSChar = Cast<AFPSPlayerCharacter>(OtherActor);
 	if (FPSChar)
 	{
-		// Launch the character
+		// Set the launch vector
 		FVector FPSDirection = FVector(
 			FPSChar->GetVelocity().X, 
 			FPSChar->GetVelocity().Y, 
 			FPSChar->GetVelocity().Z + BoostStrength);
 
-		//FPSChar->LaunchCharacter(FPSDirection * 100, true, true);
+		// Launch the character, overriding the x, y, and z
 		FPSChar->LaunchCharacter(FPSDirection, true, true);
 	}
-	/*else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Not the Character!")));
-	}*/
+	// else do nothing
 }

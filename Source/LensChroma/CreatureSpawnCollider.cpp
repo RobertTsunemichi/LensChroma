@@ -1,21 +1,33 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+// Required header
 #include "CreatureSpawnCollider.h"
-#include "Components/BoxComponent.h"
+
+// Gameplay static header
 #include <Kismet/GameplayStatics.h>
-#include "AbrrCreatureCharacterClass.h"
+
+// Collider sphere header
 #include "Components/SphereComponent.h"
+#include "Components/StaticMeshComponent.h"
+
+// Spawn behaviour targets
+#include "AbrrCreatureCharacterClass.h"
 #include "FPSPlayerCharacter.h"
 
-// Sets default values
+/*
+ * Constructor
+ */
 ACreatureSpawnCollider::ACreatureSpawnCollider()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	ColliderSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ColliderBox"));
+	// Collider sphere set up
+	ColliderSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AbrrSpawnColliderSphere"));
 	ColliderSphere->SetupAttachment(RootComponent);
+
+	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
+	StaticMesh->SetupAttachment(ColliderSphere);
 }
 
 // Called when the game starts or when spawned
@@ -23,18 +35,14 @@ void ACreatureSpawnCollider::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Attach the on overlap delegate
 	ColliderSphere->OnComponentBeginOverlap.AddDynamic(this, &ACreatureSpawnCollider::OnOverlapBegin);
 
 }
 
-// Called every frame
-void ACreatureSpawnCollider::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-// Overlap for fleeing
+/*
+ * Overlap with spawner to spawn creatures
+ */
 void ACreatureSpawnCollider::OnOverlapBegin(
 	UPrimitiveComponent* OverlappedComponent,
 	AActor* OtherActor,
@@ -47,18 +55,25 @@ void ACreatureSpawnCollider::OnOverlapBegin(
 	AFPSPlayerCharacter* FPSChar = Cast<AFPSPlayerCharacter>(OtherActor);
 	if (FPSChar)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT(">>> Removing non-chasing Creatures!")));
+		// Remove unneeded actors first
 		TArray<AActor*> CreatureToRemove;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AberrantCreature, CreatureToRemove);
 
+		// Process so long as there were actors to remove
 		if (CreatureToRemove.Num() > 0)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Destroy aberration creatures"));
 			for (AActor* SingleSpawner : CreatureToRemove)
 			{
+				/*
+				 * NOTE: There should be a better way to check whether to destroy the 
+				 * actor "with no target"
+				 */
+				// Check if the creature has a target on the player
 				AAbrrCreatureCharacterClass* Creature = Cast<AAbrrCreatureCharacterClass>(SingleSpawner);
 				if (Creature)
 				{
-					if (!Creature->bHasPlayerTarget)
+					if (Creature->PlayerTargetActor != nullptr)
 					{
 						Creature->Destroy();
 					}
@@ -66,13 +81,14 @@ void ACreatureSpawnCollider::OnOverlapBegin(
 			}
 		}
 
-
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT(">>> Spawning Creatures!")));
+		// Then spawn the new actors
 		TArray<AActor*> CreatureSpawners;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), CreatureSpawnerBox, CreatureSpawners);
 
+		// If there were actors found
 		if (CreatureSpawners.Num() > 0)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Spawn aberration creatures"));
 			for (AActor* SingleSpawner : CreatureSpawners)
 			{
 				if (SingleSpawner->ActorHasTag(SpawnerTag))
@@ -80,22 +96,15 @@ void ACreatureSpawnCollider::OnOverlapBegin(
 					AAbrrCreatureCharacterClass* Creature = GetWorld()->SpawnActor<AAbrrCreatureCharacterClass>(AberrantCreature, SingleSpawner->GetActorLocation(), FRotator(0.f, 0.f, 0.f));
 					if (Creature)
 					{
-						if (FPSChar->bIsLookingThroughCamera)
-						{
-							Creature->GetMesh()->SetMaterial(0, FPSChar->AbbrCreatureMat1);
-						}
-						else
-						{
-							Creature->GetMesh()->SetMaterial(0, FPSChar->AbbrCreatureMat2);
-						}
+						if (FPSChar->bIsLookingThroughCamera) Creature->GetMesh()->SetMaterial(0, FPSChar->AbbrCreatureMat1);
+						else Creature->GetMesh()->SetMaterial(0, FPSChar->AbbrCreatureMat2);
 					}
 				}
+				// else do nothing
 			}
 
-			if (bShouldDestroy)
-			{
-				Destroy();
-			}
+			if (bShouldDestroy) Destroy();
 		}
+		// else do nothing
 	}
 }
